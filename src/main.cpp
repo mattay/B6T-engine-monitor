@@ -27,19 +27,13 @@
 
 // Color definitions
 #define BLACK    0x0000
-// #define BLUE     0x001F
-#define RED      0xF800
-#define GREEN    0x07E0
-// #define CYAN     0x07FF
-// #define MAGENTA  0xF81F
-// #define YELLOW   0xFFE0
 #define WHITE    0xFFFF
-// #define MAZDA_BLUE     0,179,255    // '#00B3FF' 00 725
+#define MAZDA_BLUE     0x0418 // 0,128,197    // '#00B3FF'
 // #define SYMBOL_SILVER  138, 141, 143, // '#00B3FF'
 // #define SYMBOL_GREY    124, 135, 142    // '#7C878E'
-// #define WHITE          '#FFFFFF'
-// #define BLACK          '#000000'
 
+#define COLOUR_BACKGROUND  WHITE
+#define COLOUR_PRIMARY MAZDA_BLUE
 
 #define DEBUG true
 #define INPUT_ANALOG 1
@@ -59,8 +53,8 @@ int display_height = 0;
 TFT tft = TFT(TFT_CS, TFT_DC, TFT_RST);
 
 // initial position of the point is the middle of the screen
-int xPos = 80;
-int yPos = 64;
+int xPos = 0;
+int yPos = 0;
 // direction and speed
 // int xDir = 1;
 // int yDir = 1;
@@ -108,6 +102,11 @@ char changePrintout[12];
 char previousChangePrintout[12];
 String direction;
 
+int lHeight = tft.height()/2; // Last drawn
+int cHeight = tft.height()/2; // Current drawn
+int nHeight = tft.height()/2; // Next to draw
+int shift = 3;
+
 void displaySenorValue () {
   peviousSenVal = senval;
   if (INPUT_ANALOG) {
@@ -127,23 +126,25 @@ void displaySenorValue () {
     // Serial.println(volts);
 
     // Clear previous value
-    tft.stroke(0, 179, 255);
-    // tft.stroke(BLACK);
-    tft.text(previousSensorPrintout, 8, 42);
+    tft.setTextSize(3);
+    tft.stroke(COLOUR_BACKGROUND);
+    tft.text(previousSensorPrintout, 9, 24);
     // Draw new value
-    tft.stroke(255,255,255);
-    tft.text(sensorPrintout, 8, 42);
+    tft.stroke(COLOUR_PRIMARY);
+    tft.text(sensorPrintout, 9, 24);
 
-    strcpy( previousSensorPrintout, sensorPrintout);
-    strcpy( previousChangePrintout, changePrintout);
+    strcpy(previousSensorPrintout, sensorPrintout);
   }
 }
 
 void initialize_tft () {
   tft.begin();
+  tft.setTextWrap(false);
 
   display_width  = tft.width()-1;
   display_height = tft.height()-1;
+  xPos = 0;
+  yPos = display_height;
 
   String message = "Display Size: " + String(display_width) +"x"+ String(display_height) ;
   debugMessage(message);
@@ -151,7 +152,7 @@ void initialize_tft () {
 
 void splashSreen (int duration) {
   PImage logo;
-  tft.background(WHITE);
+  tft.background(COLOUR_BACKGROUND);
 
   logo = tft.loadImage("mazda.bmp");
   if (logo.isValid()){
@@ -172,16 +173,22 @@ void setup() {
   if (!SD.begin(SD_CS)){
     Serial.println("Failed");
   }else{
-    splashSreen(10000);
+    splashSreen(0);
   }
   
   Serial.println("Setup Complete");
-}
 
-int lHeight = tft.height()/2; // Last drawn
-int cHeight = tft.height()/2; // Current drawn
-int nHeight = tft.height()/2; // Next to draw
-int shift = 3;
+  tft.fillScreen(COLOUR_BACKGROUND);
+  // tft.setTextSize(1);
+  // tft.println("AaBbCcGgHhIiJjTt");
+  // tft.setTextSize(2);
+  // tft.println("AaBbCcGgHhIiJjTt");
+  // tft.setTextSize(3);
+  // tft.println("AaBbCcGgHhIiJjTt");
+  // tft.setTextSize(4);
+  // tft.println("AaBbCcGgHhIiJjTt");
+  // delay(10000);
+}
 
 void loop() {
   displaySenorValue();
@@ -196,24 +203,21 @@ void loop() {
   int yPos = tft.height() - cHeight;
 
   // draw a line in a nice color
-  tft.stroke(255,255,255);
+  tft.stroke(COLOUR_PRIMARY);
 
   if (lchange < -1) {
     direction = "DOWN ";
-    // tft.stroke(GREEN);
     tft.line(xPos - shift, lPos+1, xPos, yPos+1);
     // tft.point(xPos+1, yPos);
 
   } else if (lchange > 1) {
     direction = "UP   ";
-    // tft.stroke(RED);
     tft.line(xPos - shift, lPos, xPos, yPos);
     // tft.point(xPos+1, yPos);
     // tft.point(xPos, yPos+2);
 
   } else {
     direction = "SAME ";
-    // tft.stroke(255,255,255);
     tft.line(xPos - shift, lPos, xPos, yPos);
     // tft.point(xPos-1, yPos);
     // tft.point(xPos+1, yPos); // Second
@@ -248,27 +252,27 @@ void loop() {
 
   String message = direction + String(lchange);
   message.toCharArray(changePrintout, 12);
+  tft.setTextSize(1);
   // Clear previous value
-  tft.stroke(0, 179, 255);
+  tft.stroke(COLOUR_BACKGROUND);
   // tft.stroke(BLACK);
-  tft.text(previousChangePrintout, 8, 22);
+  tft.text(previousChangePrintout, 8, 9);
   // Draw new value
-  tft.stroke(255,255,255);
-  tft.text(changePrintout, 8, 22);
+  tft.stroke(124, 135, 142);
+  tft.text(changePrintout, 9, 9);
+  strcpy( previousChangePrintout, changePrintout);
+
 
    // if the graph has reached the screen edge
    // erase the screen and start again
    if (xPos >= 160) {
     xPos = 0;
-    tft.background(0, 179, 255);
-    // tft.background(BLACK);
+    tft.fillScreen(COLOUR_BACKGROUND);
    } else {
      // increment the horizontal position:
      xPos += shift;
-     delay(300);
+     delay(600);
    }
-
-    //  delay(5000);
     Serial.println("");
 }
 
