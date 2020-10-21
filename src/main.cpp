@@ -8,10 +8,11 @@
 
 // For the breakout, you can use any 2 or 3 pins
 // These pins will also work for the 1.8" TFT shield
-#define TFT_CS     10
-#define TFT_DC     9
-#define TFT_RST    8  // you can also connect this to the Arduino reset
+#define TFT_CS  10
+#define TFT_DC  9
+#define TFT_RST 8  // you can also connect this to the Arduino reset
                       // in which case, set this #define pin to 0!
+ #define SD_CS  5
 
 // Option 1 (recommended): must use the hardware SPI pins
 // (for UNO thats sclk = 13 and sid = 11) and pin 10 must be
@@ -20,8 +21,8 @@
 // Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 
 // Option 2: use any pins but a little slower!
-#define TFT_SCLK 52   // set these to be whatever pins you like!
-#define TFT_MOSI 51   // set these to be whatever pins you like!
+// #define TFT_SCLK 52   // set these to be whatever pins you like!
+// #define TFT_MOSI 51   // set these to be whatever pins you like!
 // Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
 
 // Color definitions
@@ -32,7 +33,7 @@
 // #define CYAN     0x07FF
 // #define MAGENTA  0xF81F
 // #define YELLOW   0xFFE0
-// #define WHITE    0xFFFF
+#define WHITE    0xFFFF
 // #define MAZDA_BLUE     0,179,255    // '#00B3FF' 00 725
 // #define SYMBOL_SILVER  138, 141, 143, // '#00B3FF'
 // #define SYMBOL_GREY    124, 135, 142    // '#7C878E'
@@ -140,7 +141,6 @@ void displaySenorValue () {
 
 void initialize_tft () {
   tft.begin();
-  tft.background(0, 179, 255);  // clear the screen with Mazda Blue
 
   display_width  = tft.width()-1;
   display_height = tft.height()-1;
@@ -149,23 +149,32 @@ void initialize_tft () {
   debugMessage(message);
 }
 
-void splashSreen () {
-  // debugMessage("WHITE");
-  // tft.background(255,255,255);  // clear the screen with black
-  // debugMessage("SYMBOL_SILVER");
-  // tft.background(138, 141, 143);  // clear the screen with black
-  // debugMessage("SYMBOL_GREY");
-  // tft.background(124, 135, 142);  // clear the screen with black
-  debugMessage("MAZDA_BLUE");
-  tft.background(0, 179, 255);  // clear the screen with black
+void splashSreen (int duration) {
+  PImage logo;
+  tft.background(WHITE);
+
+  logo = tft.loadImage("mazda.bmp");
+  if (logo.isValid()){
+    int x = 0;
+    int y = 5;
+    tft.image(logo, x, y);
+  }
+  delay(duration);
 }
 
 void setup() {
   Serial.begin(9600);
+
   Serial.println("initialize_tft...");
   initialize_tft();
-  // Serial.println("splashSreen...");
-  // splashSreen();
+
+  Serial.println("Initialize SD card...");
+  if (!SD.begin(SD_CS)){
+    Serial.println("Failed");
+  }else{
+    splashSreen(10000);
+  }
+  
   Serial.println("Setup Complete");
 }
 
