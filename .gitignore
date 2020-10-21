@@ -34,3 +34,9 @@
 .piolibdeps
 .clang_complete
 .gcc-flags.json
+
+# Directories
+build
+
+#OSX
+.DS_Store
