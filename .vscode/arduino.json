@@ -3,5 +3,6 @@
     "configuration": "cpu=atmega2560",
     "output": "build",
     "sketch": "B6T-ENGINE-MONITOR.ino",
-    "port": "/dev/cu.usbmodem1D11101"
+    "port": "/dev/cu.usbmodem14401",
+    "programmer": "arduino:avrisp"
 }
