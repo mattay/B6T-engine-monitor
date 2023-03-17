@@ -1,7 +1,8 @@
 #include <Arduino.h>
-#include <SPI.h> // Hardware-specific library
-#include <SD.h> // Hardware-specific library
-#include <TFT.h> // Hardware-specific library
+// Hardware-specific libraries
+#include <SPI.h> 
+#include <SD.h>
+#include <TFT.h>
 
 // Set LED_BUILTIN if it is not defined by Arduino framework
 // #define LED_BUILTIN 13
@@ -79,8 +80,8 @@ int sensorValue(int pin) {
 }
 
 int simulateSensorValue(int previousValue) {
-  // Serial.println(previousValue);
-  return random(previousValue-20, previousValue+20);
+  Serial.println(previousValue);
+  return random(previousValue-40, previousValue+40);
 }
 
 float getWaterVoltage () {
@@ -88,6 +89,12 @@ float getWaterVoltage () {
 
   return voltage(value, VOLTAGE_WATER_TEMP);
 }
+
+// float getWaterVoltage () {
+//   int value = sensorValue(PIN_WATER_TEMP);
+
+//   return voltage(value, VOLTAGE_WATER_TEMP);
+// }
 
 int senval = 600;
 int peviousSenVal = senval;
@@ -109,6 +116,7 @@ int shift = 3;
 
 void displaySenorValue () {
   peviousSenVal = senval;
+
   if (INPUT_ANALOG) {
     senval = sensorValue(A0);
   } else {
@@ -123,7 +131,7 @@ void displaySenorValue () {
     volts = String(voltage(senval, 5.0));
     volts = volts + "v";
     volts.toCharArray(sensorPrintout, 6);
-    // Serial.println(volts);
+    Serial.println(volts);
 
     // Clear previous value
     tft.setTextSize(3);
@@ -146,7 +154,7 @@ void initialize_tft () {
   xPos = 0;
   yPos = display_height;
 
-  String message = "Display Size: " + String(display_width) +"x"+ String(display_height) ;
+  String message = "Display Size: " + String(display_width+1) +"x"+ String(display_height+1) ;
   debugMessage(message);
 }
 
@@ -173,21 +181,22 @@ void setup() {
   if (!SD.begin(SD_CS)){
     Serial.println("Failed");
   }else{
-    splashSreen(0);
+    splashSreen(700);
   }
   
   Serial.println("Setup Complete");
 
   tft.fillScreen(COLOUR_BACKGROUND);
-  // tft.setTextSize(1);
-  // tft.println("AaBbCcGgHhIiJjTt");
-  // tft.setTextSize(2);
-  // tft.println("AaBbCcGgHhIiJjTt");
-  // tft.setTextSize(3);
-  // tft.println("AaBbCcGgHhIiJjTt");
-  // tft.setTextSize(4);
-  // tft.println("AaBbCcGgHhIiJjTt");
-  // delay(10000);
+  tft.stroke(COLOUR_PRIMARY);
+  tft.setTextSize(1);
+  tft.println("AaBbCcGgHhIiJjTt");
+  tft.setTextSize(2);
+  tft.println("AaBbCcGgHhIiJjTt");
+  tft.setTextSize(3);
+  tft.println("AaBbCcGgHhIiJjTt");
+  tft.setTextSize(4);
+  tft.println("AaBbCcGgHhIiJjTt");
+  delay(10000);
 }
 
 void loop() {
@@ -271,7 +280,7 @@ void loop() {
    } else {
      // increment the horizontal position:
      xPos += shift;
-     delay(600);
+     delay(3000);
    }
     Serial.println("");
 }
